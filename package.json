@@ -1,0 +1,14 @@
+{
+  "name": "page-fetcher",
+  "version": "1.0.0",
+  "main": "fetcher.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "needle": "^3.3.1"
+  }
+}
