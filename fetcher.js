@@ -1,53 +1,45 @@
-const needle = require('needle');
-const fs = require('node:fs');
+const needle = require("needle");
+const fs = require("node:fs");
+const util = require('util');
+const writeFile = util.promisify(fs.writeFile);
 
+// validate user input for missing arguments
+if (!process.argv[2] || !process.argv[3]) {
+  console.error('Error: Missing arguments.\nUsage: > node fetcher.js <URL> <local file path>');
+  process.exit(1);
+}; 
+
+// Store user input arguments
 const inputs = {
   URL: process.argv[2].trim(),
-  Path: process.argv[3].trim()
+  Path: process.argv[3].trim(),
 };
 
-const content = 'Some content!';
 
 needle.get(inputs.URL, (error, response, body) => {
-  console.log('error:', error); // Print the error if one occurred
-  console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-//  console.log('body:', body); // Print the HTML for the Google homepage.
-
-fs.writeFile(inputs.Path, content, { flag: 'a+' }, err => {
-  if (err) {
-    console.error(err);
-  } else {
-    // file written successfully
-    console.log(`Downloaded and saved 1235 bytes to ${inputs.Path}`);
+  // Error Handling for HTTP Requests
+  if (error) {
+    console.error(`Failed to download the resource: ${error.message}`);
+    process.exit(1);
   }
+
+  if (response.statusCode !== 200) {
+    console.error(`Failed to download the resource: HTTP Status ${response.statusCode}`);
+    process.exit(1);
+  }
+
+  // console.log("statusCode:", response && response.statusCode); // Print the response status code if a response was received
+
+  fs.writeFile(inputs.Path, body, { flag: "w" }, (err) => {
+    // File System Error Handling
+    if (err) {
+      console.error(`Failed to write to file: ${err.message}`);
+      process.exit(1); // exit on write errors
+    } else {
+      // file written successfully
+      console.log(
+        `Downloaded and saved ${body.length} bytes to ${inputs.Path}`
+      );
+    }
+  });
 });
-
-});
-
-
-
-// /* const conn = net.createConnection({ 
-//   host: argvUrl,
-//   port: 80
-// });
-//  */
-
-// needle.setEncoding('UTF8');
-
-// needle.on('connect', () => {
-//   console.log(`Connected to server!`);
-
-//   needle.write(`GET / HTTP/1.1\r\n`);
-//   needle.write(`Host: example.edu\r\n`);
-//   needle.write(`\r\n`);
-// });
-
-// /** 
-//  * HTTP Response
-//  * After request is made, the HTTP server should send us HTTP data via our TCP connection
-//  * Print the data to the screen, and end the connection
-//  */
-// needle.on('data', (data) => {
-//   console.log(data);
-//   needle.end();
-// });
